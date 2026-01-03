@@ -1,0 +1,50 @@
+% Simusoidal phase estimator (Single parameter estimation)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This portion for calulalting no of samples (N) we want
+clear all;clc;close all;
+N=20:5:100;
+A=1; % knowm Amplitude
+fo=.08; % Normalized frequency
+phi=.25*pi;
+noisevar=.05;
+nosamples=1000;
+
+% plot(n,A*cos(2*pi*fo*n + phi),n,x); % Original and noisy observations
+for l=1:length(N),
+n=0:N(l)-1;
+for k=1:nosamples,
+x= A*cos(2*pi*fo*n + phi)+(sqrt(noisevar)*randn(1,N(l)));
+Phi_e(l,k)=-(atan2((x*(sin(2*pi*fo*n'))),(x*(cos(2*pi*fo*n')))));
+
+end
+end
+
+plot(N,mean(Phi_e'),N,ones(1,length(N))*phi); % variances can alos be tabulated
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Second part of the experiment (Fixed data recored and vary the SNR)
+clear all;
+
+N=80; %
+
+A=1; % knowm Amplitude
+fo=.08; % Normalized frequency
+phi=.25*pi;
+
+nosamples=1000;
+SNR=-20:3:10; % SNR in dB
+SNR_R=
+noisevar=.05;
+var_phi=(1/(N*SNR_R));
+
+% plot(n,A*cos(2*pi*fo*n + phi),n,x); % Original and noisy observations
+for l=1:length(N),
+n=0:N(l)-1;
+for k=1:nosamples,
+x= A*cos(2*pi*fo*n + phi)+(sqrt(noisevar)*randn(1,N(l)));
+Phi_e(l,k)=-(atan2((x*(sin(2*pi*fo*n'))),(x*(cos(2*pi*fo*n')))));
+end
+end
+
+plot(N,mean(Phi_e'),N,ones(1,length(N))*phi);
+

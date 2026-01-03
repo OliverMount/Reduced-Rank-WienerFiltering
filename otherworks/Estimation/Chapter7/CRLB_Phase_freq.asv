@@ -1,0 +1,14 @@
+clear all;clc;close all;
+
+n=0:9; % Data record Length
+phi=0;
+SNR=1;
+temp=2*pi*n;
+f=0.05:.05:.45;
+
+for i=1:length(f),
+   CRLB(i)=1/sum((sin(2*pi*n*f(i)+phi).*temp).^2);
+   S=sin(2*pi*f(i)*n
+end
+
+figure,plot(f,CRLB);

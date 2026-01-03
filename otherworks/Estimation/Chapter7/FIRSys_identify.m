@@ -1,0 +1,25 @@
+% System (FIR) Identification Problem
+clear all;clc;close all;
+h=[1 .5 ]';  
+k=length(h); %No of parameters to estimate
+unormal=randn(1,100);
+% uuniform=randint(1,50)
+u=unormal;
+
+H=LSDataform(u,k,3); % Formation of Con mtx...Prewindowing method
+x=H*h+randn(1,length(u))';
+
+h_esti=inv(H'*H)*H'*x; % Estimated filter coefficents
+
+estimated_signal=H*h_esti; % Estimated signal
+figure,plot(H*h);hold on;
+plot(x,'k');
+plot(estimated_signal,'r');
+legend('Original','Observed','Estimated');
+hnd=title('FIR system identification');
+set(hnd,'fontsize',15); 
+
+
+disp(h_esti);
+disp(h);
+disp(h_esti-h);

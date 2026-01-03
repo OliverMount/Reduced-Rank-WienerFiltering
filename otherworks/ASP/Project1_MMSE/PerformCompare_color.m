@@ -1,0 +1,92 @@
+% This program for MMSE equalization of Known channel in a BPSK Transmission 
+%( with unequlai comparison); (colored  noise here)
+
+clc;clear all;close all;
+tic;
+noiter=100; % number of averaing iterations
+len=10000; % length of the transmiited sequence
+
+del=0;  % Decision delay
+M=3;    %MMSE filter length (Why 3?)
+
+Eb=1; % Energy per bit in V
+EbNodB=0:1:15;
+noisevar=1./10.^(EbNodB/10);  
+
+h=[1 0.5]; % Assumed ISI Channel model
+% h=[.5 1.2 1.5 -1];
+% h=[1 1.2 1.5 -1];
+L=length(h)-1; % ISI length
+% figure,freqz(h);figure,zplane(h)
+g=[1 .3]; % Noise coloring filter;
+
+h_corr=corr(h,h)';
+g_corr=corr(g,g)';
+h_ori=[h_corr(L+1:end) zeros(1,M)]; % To eliminate the negative time lag 
+g_ori=[g_corr(L+1:end) zeros(1,M)]; % To eliminate the negative time lag 
+
+for loop=1:noiter,   
+    
+    seq=randint(1,len);
+    seq=2*seq-1; % Transmitted sequence
+
+     r_dx_mtx=convolmtx(h,M); % Cross correlation vector (DOES NOT DEPEND ON NOISE)
+     r_dx=r_dx_mtx(del+1,:);   % Change here the decision variable
+
+        for i=1:length(noisevar),
+            
+            nois=sqrt(noisevar(i))*randn(1,len);
+            colnois=convol(nois,g)';
+            N=toeplitz(noisevar(i)*g_ori(1:M));  % Noise covariance matrix
+            X=toeplitz(h_ori(1:M));  % Unit variance transmitted correlation
+            Y=X+N; % Received Correlation matrix
+
+            MMSE_w=inv(Y)*r_dx';  % Optimum MMSE solution
+
+            y=convol(seq,h)';      % Channel output 
+            r=y+colnois; % RXed signal
+            s=convol(r,MMSE_w')';  % MMSE filter 
+            rx = s > 0;  % Decision Box (equalized sequence)
+            rx_u= r > 0; % unequalized sequence
+            rx1=(2*rx-1);
+            rx_u1=2*rx_u-1;
+
+                for m=1:length(del),
+                    rx_all(m,:)=rx1(1+del:len+m-1); % L= ISI length
+                    rx_uall(m,:)=rx_u1(1+del:len+m-1);
+                end
+
+            number=(seq==rx_all); %Counting the errors. (Change if del is an array) 
+            number1=(seq==rx_uall);
+            pe(loop,i)=(len-sum(number))/len;
+            pe1(loop,i)=(len-sum(number1))/len;
+
+        end
+    fprintf('Finished %d Iteration for %d bits  in %f seconds  \n',loop,len,toc);
+end
+
+No=noisevar;
+EBNO=10*log10(Eb./No);
+ensemble_avg=mean(pe);
+ensembleunequali=mean(pe1);
+
+% figure,hnd=semilogy(EBNO,.5*erfc(sqrt((Eb./No))),'k',EBNO,(ensemble_avg),'ko-',EBNO,ensembleunequali,'ro-');grid;
+figure,hnd=semilogy(EBNO,.5*erfc(sqrt((Eb./No))),'k',EBNO,ensembleunequali,'bo-',EBNO,ensemble_avg,'ro-');grid;
+set(hnd(1),'linewidth',2);
+set(hnd(2),'linewidth',2);
+set(hnd(3),'linewidth',2);
+legend('NO ISI','Unequalized','MMSE Equalized');
+axis([0 14 10e-8 0.5]);
+
+hnd=title('Performance of MMSE equalizer (Colored Noise)');
+set(hnd,'fontsize',15);
+hnd=xlabel(' Eb / No   in   dB ');
+set(hnd,'fontsize',15);
+hnd=ylabel('  Probability  of  Error (Pe)  ');
+set(hnd,'fontsize',15);
+
+% figure,hnd=scatter(seq,zeros(1,length(seq)),60,[1 0 0]);
+% set(hnd,'linewidth',1.8);
+% axis([-2 2 -.1 .1]);grid;hold on;
+% scatter(y,zeros(1,length(y)),20,[0 0 1]);
+% axis([-10 10 -.1 .1]); 

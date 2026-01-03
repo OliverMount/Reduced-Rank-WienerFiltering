@@ -1,0 +1,28 @@
+function x=Levinson(r,b) 
+
+p=length(b); % Desired order to stop
+% Itnitialization
+a=1;
+x=b(1)/r(1);
+episi(1)=r(1);
+% Recursion steps
+for j=2:p,
+    g(j-1)=r(2:j)*flipud(a);
+    gamma(j)=-g(j-1)/episi(j-1);
+    a=[a;0]+gamma(j)*flipud(conj([a;0]));
+    episi(j)=episi(j-1)*(1-abs(gamma(j)^2));
+    delta(j-1)=r(2:j)*flipud(x);
+    q(j)=(b(j)-delta(j-1))/episi(j);
+    x=[x;0]+q(j)*flipud(conj(a));
+end
+
+% Some examples
+% Levinson([4 2 1],[9 6 12])
+% ans =
+% 
+%      2
+%     -1
+%      3
+
+
+

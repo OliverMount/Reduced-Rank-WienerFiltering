@@ -1,0 +1,27 @@
+
+function [H_capt,Kh_capt]=KTFt_esti_comb(y,y2,Pilot,temp,Poss,M,D)
+% This function estimated TF in time domain
+% function [H_capt,H_capt_RR]=KTFt_esti_comb(y,y2,Pilot,temp,Poss,M,D)
+N=length(Pilot);
+F=sqrt(1/N)*dftmtx(N);
+Pilot_pos=Poss;
+QQ=F'; QQQ=QQ(:,1:M); QQQ1=QQ(Pilot_pos,1:M);QQQQ=QQ(Pilot_pos,Pilot_pos);
+a=F'*diag(Pilot)*QQQ*sqrt(N); % a in the data model
+
+h_capt=(inv(a'*a))*a'*y; % LS estimator for CIR (Full rank estimator)
+H_capt=QQQ*h_capt*sqrt(N); % TF estimator (Full rank)
+
+% A=a'*a;b=a'*y;
+aa=QQQQ*diag(flipud(temp))*QQQ1*sqrt(N);
+h_capt1=(inv(aa'*aa))*aa'*y2;
+disp(h_capt1);
+KH_capt1=QQQ*h_capt1*sqrt(N);
+
+A=aa'*aa ; b=aa'*y2;
+Kh_capt=LANCZOS_LS(D,M,A,b); % CIR estimate (Reduced rank)
+
+% for z=1:D,
+% H_capt_RR(:,z)=QQ*Kh_capt(:,z)*sqrt(N); % TF estimator (Reduced rank)
+% end
+
+

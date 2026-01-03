@@ -1,0 +1,16 @@
+% This program generates the Walsh codes for a givn length N
+function W=WalGen(
+clear all;clc;close all;
+N=input('Enter the length of the walsh code');
+fprintf('\nThe value of N should be power of 2 N=2^k where k is an integer');
+
+h2=[1 1;1 -1];
+temp=h2;
+m=log10(N)/log10(2);
+
+for i=1:m-1,
+    tempvar=[temp temp;temp -temp];
+    clear temp;
+    temp=tempvar;
+    clear tempvar;
+end

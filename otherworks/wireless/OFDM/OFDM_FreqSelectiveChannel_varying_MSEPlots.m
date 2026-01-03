@@ -1,0 +1,95 @@
+% OFDM with (QPSK) modulation and RR LS channel estimation
+
+clear all;clc;close all;tic;
+N=512; % No of sub-carriers
+O=10; % no of OFDM symbols
+len=N*O; % total number of QPSK symbols 
+
+% Pilot positions in Comb type carriers
+p_gap=7; %16 (3,5) 32-31 64(3,7)  256 -3 512-7  
+Pilot_pos=1:p_gap:N;
+L=length(Pilot_pos); % For Comb type carriers
+
+noiter=10;
+Z=4; % Signifies QPSK
+D=4; % Desired reduced rank
+
+Eb=1; EbNodB=0:5:40; No=1./10.^(EbNodB/10);  Es=log2(Z)*Eb;
+codebook=exp(j*2*pi*(0:Z-1)/Z + j*pi/4); % QPSK codebook
+
+% Static Telephone Channel
+% h=[0+j*0 0.0485+j*0.0194 0.0573+j*0.0253 0.0786+j*0.0282 0.0874+j*0.0447 0.9222+j*0.3031 0.1427+j*0.0349 0.0835+j*0.0157 0.0621+j*0.0078 0.0359+j*0.0049 0.0214+j*0.0019];
+% h=[1+j -.8+j .25-j];
+% Time varyimg mobile channel
+Pow_delay=[-3 -5 -8 -10  -12 -11 -8 -10 -12 -9 -9.23]; % Power delay profile values in dB
+h_temp=CallJack_function(O,11); % this is 'capital O' not zero
+for xx=1:O,
+h(:,xx)=(diag(10.^(Pow_delay./10))*((h_temp(xx,:).')/norm(h_temp(xx,:))));
+end
+
+% M=length(h);
+M=11; % serious parameter..
+% H=CircMtx(h,N); 
+
+F=(1/sqrt(N))*dftmtx(N);
+
+for loop=1:noiter,
+  
+  for i=1:length(No),
+   for q=1:O, % upto  no of OFDM symbols
+    H=CircMtx(h(:,q).',N); % channel matrix for Frequency selective Fading
+    temp=(2*randint(1,L)-1).';
+    Pilot=(upsample(temp,p_gap));
+    Pilot=flipud(Pilot(1:N));
+    % Time domain Channel Estimation part
+    noi=randn(1,N)+j*randn(1,N);
+    noise=sqrt(No(i)/2)*noi.';
+    x=F'*Pilot; % taking IFFT before transmission
+    y1=H*x+noise; % Passing thro Channel  + noise (received symbols)
+    Y1=F*y1;
+    y2=flipud(y1(N:-p_gap:1)); % Received values at the  
+%     [H_capt,H_capt_RR]=KTFt_esti_comb(y,y2,Pilot,flipud(temp),Pilot_pos,M,D); E_capt=diag(H_capt);% Time doamin TF estimator Block type
+    [H_capt,H_capt_rr,H_captrr]=KTFt_esti_comb(y1,y2,Pilot,flipud(temp),Pilot_pos,M,D,p_gap); ;% Time doamin TF estimator Block type
+%     Y=F*y;
+    H_capf=TFf_esti(Y1,Pilot);  ;% Freq doamin TF estimator
+    E=F*H*F'; % For Full channel knowledge
+    
+     %      pe_capf(loop,i)=(len-sum(number2))/len;
+     pe_capt_rr(:,q)= abs(H_capt_rr-diag(E)).^2; % For full rank
+     pe_captrr1(:,q)= abs(H_captrr(:,1)-diag(E)).^2;
+     pe_captrr2(:,q)= abs(H_captrr(:,2)-diag(E)).^2;
+     pe_captrr3(:,q)= abs(H_captrr(:,3)-diag(E)).^2;
+     pe_captrr4(:,q)= abs(H_captrr(:,4)-diag(E)).^2;
+    
+end
+
+MSE_rr(loop,i)= mean(mean(pe_capt_rr'));
+MSE_rr1(loop,i)= mean(mean(pe_captrr1'));
+MSE_rr2(loop,i)= mean(mean(pe_captrr2'));
+MSE_rr3(loop,i)= mean(mean(pe_captrr3'));
+MSE_rr4(loop,i)= mean(mean(pe_captrr4'));
+
+
+end
+fprintf('Finished %d Iteration for %d symbols in %f seconds  \n',loop,len,toc);
+end
+
+EBNO=10*log10(Eb./No);
+% ensemble_avg=mean(MSE_rr)
+% ensemble_avg_capt=mean(pe_capt)
+% ensemble_avg_capf=mean(pe_capf)
+ensemble_avg_capt_rr1=10*log10(mean(MSE_rr)) % Fullrank
+ensemble_avg_captrr1=10*log10(mean(MSE_rr1))% RAnk 1
+ensemble_avg_captrr2=10*log10(mean(MSE_rr2)) % RAnk 2
+ensemble_avg_captrr3=10*log10(mean(MSE_rr3)) % RAnk 3
+ensemble_avg_captrr4=10*log10(mean(MSE_rr4))% RAnk 2
+
+
+figure,hnd=plot(EBNO,ensemble_avg_capt_rr1,'k-',EBNO,ensemble_avg_captrr1,'^-',EBNO,ensemble_avg_captrr2,'kp-',EBNO,ensemble_avg_captrr3,'>-',EBNO,ensemble_avg_captrr4,'<-');grid;
+legend('Comb-type Time domain Full-rank','rank 1','Rank 2','Rank 3','Rank 4');
+% legend('Perfect Channel','Comb-type Time domain Full-rank','Rank 4','Rank 3','Freq domain Full rank');
+% axis([10 40 10e-6 1]);
+hnd=xlabel(' Eb/No  in   dB ');
+set(hnd,'fontsize',13,'color',[0 0 1]);
+hnd=ylabel('  MSE  ');
+set(hnd,'fontsize',13,'color',[0 0 1]);

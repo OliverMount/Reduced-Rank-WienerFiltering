@@ -1,0 +1,10 @@
+% Approximation display in single Phase estimation 
+
+fo=0:.01:.5;
+N=50; % No of data samples
+n=0:N-1;
+noisevar=0.1;
+
+for m=1:N,
+    fo
+x(m,l)=cos(2*pi*fo*n)+sqrt(noisevar)*randn(1,length(n));

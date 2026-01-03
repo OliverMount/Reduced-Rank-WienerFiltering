@@ -1,0 +1,6 @@
+function  X=SP(x,N)
+
+% x- data sequence
+% N - no of OFDM symbols
+
+bl=length(x)/N; % Block length

@@ -1,0 +1,25 @@
+function x=BackSubs(a,b)
+
+% Algorithm for Backward substitution for solving Ax=b;
+[m,n]=size(a);
+
+for i=m:-1:1,
+    temp=0;
+    for j=i+1:m,
+        temp=temp+a(i,j)*x(j);
+    end
+    x(i)=(b(i)-temp)/a(i,i);
+end
+
+x=x';
+
+
+% Test matrices for verification
+% A =[  4    -1     2     3
+%      0    -2     7    -4
+%      0     0     6     5
+%      0     0     0     3];
+%  
+%  b=[20    -7     4     6];
+%  
+%  x=[ 3  -4  -1   2];

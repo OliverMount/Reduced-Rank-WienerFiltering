@@ -1,0 +1,17 @@
+% Exercise 7.18 ( Importance of Initial Guess)
+clear all;clc;close all;
+y=-3:.1:13;
+x=exp(-(y.^2)/2) + (.1)*exp(-((y-10).^2)/2);
+figure,plot(y,x); % For this function Maximum occurs at 0
+
+% Newton Raphson method
+
+noiter=30;
+% r_e(1)= .5 ; % Initial estimate
+% 
+% for k=2:noiter,
+%     numer=sum((x-(r_e(k-1)).^n).*n.*(r_e(k-1).^(n-1)));
+%     denomi= sum(n.*(r_e(k-1).^(n-2)).*(((n-1).*x)-((2*n-1).*(r_e(k-1).^n))));
+%     r_e(k)=r_e(k-1) - (numer/denomi);
+% end
+% figure,plot(1:noiter,r_e,1:noiter,ones(1,noiter)*r);

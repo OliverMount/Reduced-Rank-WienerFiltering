@@ -1,0 +1,43 @@
+% Performance evaluation of BPSK
+clear all;clc;tic;
+noiter=50; seq_length=100000;
+for loop=1:noiter,    
+    
+    seq=randint(1,seq_length);
+    seq=2*seq-1;            % Antipodal mapper
+    
+    Eb=1; % Energy per bit in V
+    SNR=0:1:12;
+    No=Eb./10.^(SNR/10);    
+    
+    % Generation of PAM signal
+    
+    for i=1:length(No),
+        TRANSsignal(i,:)=sqrt(Eb)*seq;
+        % Noise generation
+        noi=randn(1,length(TRANSsignal));
+        noise=sqrt(No(i)/2)*noi; % 
+        RECEIVEDsignal(i,:)=TRANSsignal(i,:)+noise; % Signal + Noise
+        z(i,:)=RECEIVEDsignal(i,:) > 0;     % Decision Threshold = 0 ;
+        z1(i,:)=(2*z(i,:))-1;
+        number=(seq==z1(i,:)); %Counting the errors. 
+        pe(loop,i)=(seq_length-sum(number))/seq_length;
+        
+    end
+    fprintf('Finished %d Iteration for %d bits  in %f seconds  \n',loop,seq_length,toc);
+end
+
+ensemble_avg=mean(pe);
+
+figure,hnd=semilogy(SNR,.5*erfc(sqrt((Eb./No))),'k',SNR,(ensemble_avg),'ko-');grid;
+set(hnd(1),'linewidth',2);
+set(hnd(2),'linewidth',2);
+legend('Theoretical','Practical');
+axis([0 12 10e-8 0.5]);
+
+hnd=title('Coherent BPSK Performance Chart');
+set(hnd,'fontsize',15);
+hnd=xlabel(' Eb / No   in   dB ');
+set(hnd,'fontsize',15);
+hnd=ylabel('  Probability  of  Error (Pe)  ');
+set(hnd,'fontsize',15);

@@ -1,0 +1,41 @@
+% Program for estimation of Uniform Noise variance
+% Uniform RV dont have CRLB and by using SS find MVUE
+% MVUE is 16 dB better than sample mean estimator
+
+
+clear all;clc;close all
+N=100; 
+beta=1;
+noiter=1000;
+
+for i=1:noiter,
+x=beta*rand(1,N); % Data 
+SM(i)=sum(x)/N;
+Unimean(i)=((N+1)/(2*N))*max(x);
+end
+
+% smean_var=10*log10(var(SM));
+% umean_var=10*log10(var(Unimean));
+% 
+% plot(1:1000,SM,1:1000,Unimean);
+% 
+clear all;
+
+N=100; 
+beta=1;
+noiter=1000;
+for k=1:N,
+for i=1:noiter,
+x=beta*rand(1,k); % Data 
+SM(k,i)=sum(x)/k;
+Unimean(k,i)=((k+1)/(2*k))*max(x);
+end
+end
+
+smean_var=10*log10(var(SM'));
+umean_var=10*log10(var(Unimean'));
+
+plot(1:N,smean_var,1:N,umean_var);
+xlabel('N -- >');
+ylabel('Variance');
+legend('Sample mean','MVUE estimator');

@@ -1,0 +1,20 @@
+function chann=FlatAR(P,M,fm,fs,epselonn)
+    % P: AR model order
+    % M: number of samples
+    % fd: maximum doppler frequency in Hz
+    % fs: Symbol frequency in ksps
+    % epselonn: added bias, depends on the Doppler rate, see the paper "Autoregressive modeling for fading channel simulation". 
+    % usage: Rayleigh_fading(100,10000,150,3,0.00000001)
+    
+    %-------------------------------------------------------------------------------------------------------------------------   
+       vector_corr=besselj(0,2*pi*fm*(0:P)/(fs*1000)); % Bessel autocorrelation function according to Jakes' model
+
+       auto_correaltion_matrix=toeplitz(vector_corr(1:P))+eye(P)*epselonn; % adding a small bias, epselonn, to the autocorrelation matrix to overcome the ill conditioning of Yule-Walker equations
+        AR_parameters=-inv(auto_correaltion_matrix)*vector_corr(2:P+1)'; % Solving the Yule-Walker equations to obtain the model parameters
+        segma_u=auto_correaltion_matrix(1,1)+vector_corr(2:P+1)*AR_parameters;
+        
+       
+       h=filter(1,[1 AR_parameters.'],wgn(M,1,10*log10(segma_u),'complex')); % Use the function Filter to generate the channel coefficients
+       chann=h;  % Ignore the first KKK samples
+         
+    %------------------------------------------------------------------------------------------------------------------------- 

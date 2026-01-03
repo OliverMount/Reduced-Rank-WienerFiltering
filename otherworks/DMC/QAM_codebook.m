@@ -1,0 +1,17 @@
+function a=QAM_codebook(M)
+
+% d = 1 2-QAM BPSK
+codebook_all{1}=[1 -1];
+% d= 1/sqrt(2) 4-QAM QPSK
+codebook_all{2}=(1/sqrt(2))*[-1+j -1-j 1-j 1+j];
+% d= 1/sqrt(6) 8-QAM
+codebook_all{3}=[sqrt(5/3)*[-.9487+.3162j -.9487-.3162j] sqrt(1/6)*[-1-j -1+j] sqrt(1/6)*[1+j 1-j]  sqrt(5/3)*[.9487+.3162j .9487-.3162j]];
+
+% d= 1/sqrt(10) 16-QAM
+% codebook_all{4}=[sqrt(1/10)*[-1+j -1-j 1-j 1+j] .9487+.3162j .9487-.3162j -.9487+.3162j -.9487-.3162j .3162+.9487j .3162-.9487j -.3162+.9487j -.3162-.9487j (sqrt(.9))*[-1+j -1-j 1-j 1+j]];
+codebook_all{4}=sqrt(1/10)*[-3-3j -3-j -3+3j -3+j -1-3j -1-j -1+3j -1+j 3-3j 3-j 3+3j 3+j 1-3j 1-j 1+3j 1+j];
+     
+codebook_all{6}=sqrt(64/2688)*[-7-7j -7-5j -7-j -7-3j -7+7j -7+5j -7+j -7+3j -5-7j -5-5j -5-j -5-3j -5+7j -5+5j -5+j -5+3j -1-7j -1-5j -1-j -1-3j -1+7j -1+5j -1+j -1+3j -3-7j -3-5j -3-j -3-3j -3+7j -3+5j -3+j -3+3j 7-7j 7-5j 7-j 7-3j 7+7j 7+5j 7+j 7+3j  5-7j 5-5j 5-j 5-3j 5+7j 5+5j 5+j 5+3j 1-7j 1-5j 1-j 1-3j 1+7j 1+5j 1+j 1+3j 3-7j 3-5j 3-j 3-3j 3+7j 3+5j 3+j 3+3j ];
+% d.^2=(64/2688) or d=1/sqrt(42) 64-QAM
+% avgE=mean(abs(codebook).^2); % Average Energy of the constellation (Usually one)
+a=codebook_all{log2(M)};

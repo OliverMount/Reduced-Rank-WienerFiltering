@@ -1,0 +1,8 @@
+x=2*randint(1,500)-1;
+noise=randn(1,500);
+y=x+noise;
+
+figure,scatter(x,zeros(1,length(x)));
+axis([-2 2 -.4 .4]);grid
+figure,scatter(y,zeros(1,length(x)));
+axis([-10 \5 -.4 .4]);grid

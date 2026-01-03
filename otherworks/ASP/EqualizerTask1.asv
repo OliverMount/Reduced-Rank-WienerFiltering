@@ -1,0 +1,69 @@
+% Assignment 3 -Equalizer  For Task 1: Effect of Eigen value spread
+clear all;
+clc;
+close all;
+noisevar=.001;
+W=[2.9 ,3.3 ,3.5];
+for j=1:length(W),
+for n=1:3,
+h(j,n)=.5*(1+cos(2*pi*(n-2)/W(j)));
+end
+r(j,:)=[h(j,1)^2+h(j,2)^2+h(j,3)^2+noisevar h(j,1)*h(j,2)+h(j,2)*h(j,3) h(j,1)*h(j,3)];
+end
+mu=.075;
+for varyW=1:length(W),
+for ensemble=1:50,
+L=1000; % Length of the desired signal
+%Desired signal genration
+d=randint(1,L);
+d=2*d-1; % Mean zero Variance 1.
+d_delayed=[zeros(1,6) d(1:L-6)];
+%Channel Output.
+mtx=convolmtx(d,length(h));
+z=mtx*h(varyW,:)';
+v=sqrt(noisevar)*randint(1,length(z)); % Noise Variance .001
+u=z+v';
+u=u';
+[w,e]=assign3LMS(u,d_delayed,mu);
+err(ensemble,:)=e;
+store_w(ensemble,:)=w(end,:);
+end
+Avg_weight(varyW,:)=mean(store_w);
+final(varyW,:)=(mean(abs(err))).^2;
+end
+
+figure,semilogy(final'); % Mean Square error
+hnd=title('Error convergence plot');
+set(hnd,'fontsize',15);
+hnd=xlabel('Number of iterations --> ');
+set(hnd,'fontsize',15);
+hnd=ylabel('Mean square error --> ');
+set(hnd,'fontsize',15);
+legend('W=2.9','W=3.3','W=3.5');
+
+
+figure,plot(w(:,(7:10)));hold ;
+hnd=title('Weight Vector Convergence Plot');
+set(hnd,'fontsize',15);
+hnd=xlabel('Number of iterations --> ');
+set(hnd,'fontsize',15);
+hnd=ylabel('Weights --> ');
+set(hnd,'fontsize',15);
+legend('w7','w8','w9','w10');
+
+% ploting for straight lines in Weight vector convergence plot
+temp=ones(length(w)+200,1);
+TEMPMtx=temp*Avg_weight(varyW,7:10);
+plot(TEMPMtx);
+
+
+% Eigen Values, Conditional Number Calculations
+% We alread know the Auto corrlation Values for each W (=2.7, 3.3  3.5)
+% which are stored in vaiable r
+
+for i=1:length(W),
+ALLeig(:,i)=eig(toeplitz([r(i,:) zeros(1,8)]));
+conditionalNumber(i)=max(ALLeig(:,i))/min(ALLeig(:,i));
+end
+figure,stem(1:length(h(1,:)),h(1,:));
+figure,stem(1:
